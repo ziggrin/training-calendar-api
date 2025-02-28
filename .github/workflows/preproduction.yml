@@ -7,7 +7,7 @@ on:
           type: choice
           description: 'Env to run [ test | ci | preprod | prod ]'
           required: true
-          default: "ci"
+          default: "preprod"
           options:
             - "test"
             - "ci"
@@ -45,7 +45,7 @@ jobs:
         run: |
           docker build -t $APP_ECR_REGISTRY/$APP_ECR_REPOSITORY:$IMAGE_TAG -f app.Dockerfile .
           docker tag $APP_ECR_REGISTRY/$APP_ECR_REPOSITORY:$IMAGE_TAG $APP_ECR_REGISTRY/$APP_ECR_REPOSITORY:latest
-          docker push $APP_ECR_REGISTRY/$APP_ECR_REPOSITORY:$IMAGE_TAG  --all-tags
+          docker push $APP_ECR_REGISTRY/$APP_ECR_REPOSITORY --all-tags
           echo "image=$APP_ECR_REGISTRY/$APP_ECR_REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
 
       - name: nginx - Build, tag, and push image to Amazon ECR
