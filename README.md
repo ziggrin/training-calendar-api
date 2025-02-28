@@ -7,7 +7,7 @@ In production (or preprod), it’s deployed as an ECS Fargate task behind a load
 ## Some of the cool things:
 - checkout CI/CD in workflows,
 - Nginx works as a reverse proxy with H5BP configuration,
-- in pre/production sensitive data is being served from AWS Parameter Store by [Chamber]("https://github.com/segmentio/chamber")
+- in pre/production sensitive data is being served from AWS Parameter Store by [Chamber](https://github.com/segmentio/chamber)
 
 
 ## To start development all you need is:
