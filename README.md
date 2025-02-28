@@ -15,6 +15,7 @@ In production (or preprod), it’s deployed as an ECS Fargate task behind a load
 - go into .dockerdev folder and run **docker compose up**.
 
 ## Frontend
+#### Repo: https://github.com/ziggrin/training-calendar-frontend
 #### It might be easier/prefered to run frontend on your local machine simply using your local node: 
 - **npm start**
 
