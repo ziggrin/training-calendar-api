@@ -79,10 +79,10 @@ jobs:
           container-name:  nginx
           image:           ${{ steps.nginx-build-image.outputs.image }}
 
-      - name: Deploy Amazon ECS task definition api-pack
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.nginx-task-def.outputs.task-definition }}
-          service: preprod-training-calendar-api
-          cluster: preprod-training-calendar
-          wait-for-service-stability: true
+      # - name: Deploy Amazon ECS task definition api-pack
+      #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      #   with:
+      #     task-definition: ${{ steps.nginx-task-def.outputs.task-definition }}
+      #     service: preprod-training-calendar-api
+      #     cluster: preprod-training-calendar
+      #     wait-for-service-stability: true
