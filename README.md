@@ -1,26 +1,37 @@
 # Training Calendar API
 
-This is a Ruby on Rails application that provides a backend API for managing a training calendar. It runs Puma as its application server (with the command bundle exec puma -C config/puma.rb).
+This is a Ruby on Rails application that provides a backend API for managing a training calendar. It runs Puma as its application server (`bundle exec puma -C config/puma.rb`).
 
-In production (or preprod), it’s deployed as an ECS Fargate task behind a load balancer, handling API requests for training calendar service.
+In production (or preproduction), the app is deployed as an ECS Fargate task behind a load balancer, handling API requests for the training calendar service.
 
-## Some of the cool things:
-- checkout CI/CD in workflows,
-- Nginx works as a reverse proxy with H5BP configuration,
-- in pre/production sensitive data is being served from AWS Parameter Store by [Chamber](https://github.com/segmentio/chamber)
+## Some of the Cool Features
 
+- **CI/CD Workflows:** Check out the continuous integration and deployment workflows.
+- **Nginx Reverse Proxy:** Nginx is used as a reverse proxy with an HTML5 Boilerplate (H5BP) configuration.
+- **Secret Management:** In preproduction/production, sensitive data is served from AWS Parameter Store via [Chamber](https://github.com/segmentio/chamber).
 
-## To start development all you need is:
-- simply installed docker desktop (the regular docker works as well, tho we're using docker compose here),
-- go into .dockerdev folder and run **docker compose up**.
+## Getting Started with Development
 
+To start development, all you need is:
+- Docker Desktop installed (or a standard Docker installation—Docker Compose is used in this project).
+- Navigate to the `.dockerdev` folder and run:
+
+```bash
+docker compose up
+```
 ## Frontend
-#### Repo: https://github.com/ziggrin/training-calendar-frontend
-#### It might be easier/prefered to run frontend on your local machine simply using your local node: 
-- **npm start**
 
-#### Though it is possible to run front as a docker container as well:
-- clone frontend github repo into project main path,
-- uncomment the **react** service section from docker-compose.yml. This should be enough for docker to run your frontend in container and for it to be able to connect with backend.
+**Repository:** [https://github.com/ziggrin/training-calendar-frontend](https://github.com/ziggrin/training-calendar-frontend)
+
+It might be easier (or preferred) to run the frontend on your local machine using your local Node.js installation. Simply navigate to the frontend directory and run:
+
+```bash
+npm start
+```
+
+Alternatively, you can run the frontend as a Docker container:
+
+- Clone the frontend GitHub repository into the project’s main directory.
+- Uncomment the react service section in `docker-compose.yml`. This will allow Docker to run the frontend container, which can then connect to the backend.
 
 Enjoy.
