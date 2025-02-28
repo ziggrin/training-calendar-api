@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @api_v1_category %>
+
+<div>
+  <%= link_to "Edit this category", edit_api_v1_category_path(@api_v1_category) %> |
+  <%= link_to "Back to categories", api_v1_categories_path %>
+
+  <%= button_to "Destroy this category", @api_v1_category, method: :delete %>
+</div>

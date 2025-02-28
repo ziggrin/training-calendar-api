@@ -1,0 +1,57 @@
+<%= form_with(model: api_v1_post) do |form| %>
+  <% if api_v1_post.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(api_v1_post.errors.count, "error") %> prohibited this api_v1_post from being saved:</h2>
+
+      <ul>
+        <% api_v1_post.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :title, "Title*", style: "display: block" %>
+    <%= form.text_field :title %>
+  </div>
+
+  <div>
+    <%= form.label :date, style: "display: block" %>
+    <%= form.date_field :date %>
+  </div>
+
+  <div>
+    <%= form.label :description, style: "display: block" %>
+    <%= form.textarea :description %>
+  </div>
+
+  <div class="field">
+    <%= form.label :image_file, "Upload Image" %><br>
+    <%= form.file_field :image_file %>
+  </div>
+
+  <div>
+    <%= form.label :duration, "Duration (in minutes)*", style: "display: block" %>
+    <%= form.number_field :duration %>
+  </div>
+
+  <div class="field">
+    <%= form.label :category_id, "Category* (choose from list)" %><br>
+    <%= form.select :category_id,
+      options_from_collection_for_select(Api::V1::Category.order(:name), :id, :name, form.object.category_id),
+      prompt: "Select a category" %>
+    <!-- Link to create a new category -->
+    <div>
+      <%= link_to 'New Category', new_api_v1_category_path, class: 'new-category-link' %>
+    </div>
+  </div>
+
+  <div>
+    <h3>*Required</h3>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <%= form.submit %>
+  </div>
+<% end %>

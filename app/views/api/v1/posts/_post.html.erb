@@ -1,0 +1,36 @@
+<div id="<%= dom_id post %>">
+  <p>
+    <strong>Title:</strong>
+    <%= post.title %>
+  </p>
+
+  <p>
+    <strong>Date:</strong>
+    <%= post.date %>
+  </p>
+
+  <p>
+    <strong>Description:</strong>
+    <%= post.description %>
+  </p>
+
+  <p>
+    <strong>Image:</strong>
+    <% if post.image_file.attached? %>
+      <%= image_tag url_for(post.image_file), style: "max-width:100px; max-height:100px;" %>
+    <% else %>
+      No image attached.
+    <% end %>
+  </p>
+
+  <p>
+    <strong>Duration:</strong>
+    <%= post.duration %>
+  </p>
+
+  <p>
+    <strong>Category:</strong>
+    <%= post.category_id %>
+  </p>
+
+</div>

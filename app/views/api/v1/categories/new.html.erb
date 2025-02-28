@@ -1,0 +1,15 @@
+<% content_for :title, "New category" %>
+
+<h1>New category</h1>
+
+<%= render "form", api_v1_category: @api_v1_category %>
+
+<br>
+
+<div>
+  <%= link_to "Back to categories", api_v1_categories_path %>
+</div>
+
+<div>
+  <%= link_to "Back to posts", new_api_v1_post_path %>
+</div>

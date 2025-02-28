@@ -1,0 +1,66 @@
+services:
+  web:
+    build:
+      context: ../
+      dockerfile: ./.dockerdev/app.Dockerfile
+    container_name: ror-api
+    user: "1000:1000"
+    volumes:
+      - ..:/app
+    environment:
+      - RAILS_ENV=development
+      - RAILS_DB_HOST=db
+      - RAILS_DB_USERNAME=postgres
+      - RAILS_DB_PASSWORD=password
+      # - RAILS_DB_NAME= only used in production.
+      # - RAILS_URL_HOST= only used in production.
+      # - RAILS_MASTER_KEY = only used in production.
+      - RAILS_TIME_ZONE=Warsaw
+      - RAILS_MAX_THREADS=3
+      - NGINX_HOST=localhost # only for local development - value from nginx service below
+      - NGINX_PORT=8080      # only for local development - value from nginx service below
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17.3
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: training_sessions_development
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    build:
+      context: ../
+      dockerfile: ./.dockerdev/nginx.Dockerfile
+    container_name: nginx
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount our custom nginx config file
+      - ../.dockerdev/nginx:/etc/nginx
+    depends_on:
+      - web
+
+  # react:
+  #   build:
+  #     context: ../
+  #     dockerfile: ./training-calendar-react/.dockerdev/react.Dockerfile
+  #   container_name: react
+  #   ports: 
+  #     - 3000:3000
+  #   depends_on:
+  #     - nginx
+
+volumes:
+  postgres_data:
