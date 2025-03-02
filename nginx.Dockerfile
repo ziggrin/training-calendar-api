@@ -12,5 +12,5 @@ COPY nginx/ /etc/nginx/
 
 COPY ./public/favicon.ico /var/www/html/favicon.ico
 
-# Test config
-RUN nginx -t
+# # Test config - commented out cause in EC2 we're using linking (http://app:3000)
+# RUN nginx -t
