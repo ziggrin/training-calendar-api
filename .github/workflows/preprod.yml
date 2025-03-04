@@ -7,7 +7,7 @@ on:
           type: choice
           description: 'Env to run [ test | ci | preprod | prod ]'
           required: true
-          default: ci
+          default: preprod
           options:
             - test
             - ci
