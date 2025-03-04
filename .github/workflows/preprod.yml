@@ -16,7 +16,7 @@ on:
 
 jobs:
 
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: ${{ inputs.envToRun }}
@@ -97,7 +97,7 @@ jobs:
 
       - name: DEBUG - Check ECS deployment status
         run: |
-          aws ecs describe-services --services rollback --cluster rollback --query "services[0].deployments" > deployments.json
+          aws ecs describe-services --services ${{ env.SERVICE_NAME }} --cluster ${{ env.CLUSTER_NAME }} --query "services[0].deployments" > deployments.json
           cat deployments.json
 
       - name: Rollback detection
@@ -105,15 +105,14 @@ jobs:
         env:
           CLUSTER_NAME: ${{ env.CLUSTER_NAME }}
           SERVICE_NAME: ${{ env.SERVICE_NAME }}
-          AWS_REGION:   ${{ env.AWS_REGION }}
         run: |
           # Get task definition ARN from previous deployment step
           NEW_TASK_DEF_ARN="${{ steps.deploy-task.outputs.task-definition-arn }}"
       
           # Get current active task definition from ECS service
           CURRENT_TASK_DEF_ARN=$(aws ecs describe-services \
-            --cluster $CLUSTER_NAME \
-            --services $SERVICE_NAME \
+            --cluster ${{ env.CLUSTER_NAME }} \
+            --services ${{ env.SERVICE_NAME }} \
             --query 'services[0].taskDefinition' \
             --output text)
       
