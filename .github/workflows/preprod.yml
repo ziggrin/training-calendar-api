@@ -1,0 +1,128 @@
+name: Deploy preprod
+
+on:
+  workflow_dispatch:
+    inputs:
+        envToRun:
+          type: choice
+          description: 'Env to run [ test | ci | preprod | prod ]'
+          required: true
+          default: ci
+          options:
+            - test
+            - ci
+            - preprod
+            - prod
+
+jobs:
+
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ inputs.envToRun }}
+    env:
+      CLUSTER_NAME: preprod-training-calendar
+      SERVICE_NAME: preprod-training-calendar-api
+      AWS_REGION: eu-north-1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: $AWS_REGION
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: app - Build, tag, and push image to Amazon ECR
+        id: app-build-image
+        env:
+          APP_ECR_REGISTRY:   ${{ steps.login-ecr.outputs.registry }}
+          APP_ECR_REPOSITORY: training-calendar-api-preprod-app
+          IMAGE_TAG:          ${{ github.sha }}
+        run: |
+          docker build -t $APP_ECR_REGISTRY/$APP_ECR_REPOSITORY:$IMAGE_TAG -f app.Dockerfile .
+          docker tag      $APP_ECR_REGISTRY/$APP_ECR_REPOSITORY:$IMAGE_TAG $APP_ECR_REGISTRY/$APP_ECR_REPOSITORY:latest
+          docker push     $APP_ECR_REGISTRY/$APP_ECR_REPOSITORY --all-tags
+          echo "image=$APP_ECR_REGISTRY/$APP_ECR_REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: nginx - Build, tag, and push image to Amazon ECR
+        id: nginx-build-image
+        env:
+          NGINX_ECR_REGISTRY:   ${{ steps.login-ecr.outputs.registry }}
+          NGINX_ECR_REPOSITORY: training-calendar-api-preprod-nginx
+          IMAGE_TAG:            ${{ github.sha }}
+        run: |
+          docker build -t $NGINX_ECR_REGISTRY/$NGINX_ECR_REPOSITORY:$IMAGE_TAG -f nginx.Dockerfile .
+          docker tag      $NGINX_ECR_REGISTRY/$NGINX_ECR_REGISTRY:$IMAGE_TAG $NGINX_ECR_REGISTRY/$NGINX_ECR_REGISTRY:latest
+          docker push     $NGINX_ECR_REGISTRY/$NGINX_ECR_REPOSITORY --all-tags
+          echo "image=$NGINX_ECR_REGISTRY/$NGINX_ECR_REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Download task definition
+        env:
+          TASK_DEFINITION: preprod-training-calendar-api
+        run: |
+          aws ecs describe-task-definition --task-definition $TASK_DEFINITION --query taskDefinition > task-definition.json
+
+      - name: Fill in the app task definition with new image ID
+        id: app-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name:  app
+          image:           ${{ steps.app-build-image.outputs.image }}
+
+      - name: Take updated task definition and update the nginx image ID as well
+        id: nginx-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.app-task-def.outputs.task-definition }}
+          container-name:  nginx
+          image:           ${{ steps.nginx-build-image.outputs.image }}
+
+      - name: Deploy ECS task definition
+        id: deploy-task
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.nginx-task-def.outputs.task-definition }}
+          cluster: $CLUSTER_NAME
+          service: $SERVICE_NAME
+          wait-for-service-stability: true
+
+      - name: DEBUG - Check ECS deployment status
+        run: |
+          aws ecs describe-services --services rollback --cluster rollback --query "services[0].deployments" > deployments.json
+          cat deployments.json
+
+      - name: Rollback detection
+        id: rollback-detection
+        env:
+          CLUSTER_NAME: $CLUSTER_NAME
+          SERVICE_NAME: $SERVICE_NAME
+          AWS_REGION:   $AWS_REGION
+        run: |
+          # Get task definition ARN from previous deployment step
+          NEW_TASK_DEF_ARN="${{ steps.deploy-task.outputs.task-definition-arn }}"
+      
+          # Get current active task definition from ECS service
+          CURRENT_TASK_DEF_ARN=$(aws ecs describe-services \
+            --cluster $CLUSTER_NAME \
+            --services $SERVICE_NAME \
+            --query 'services[0].taskDefinition' \
+            --output text)
+      
+          echo "New Task ARN: $NEW_TASK_DEF_ARN"
+          echo "Current Task ARN: $CURRENT_TASK_DEF_ARN"
+      
+          if [ "$NEW_TASK_DEF_ARN" != "$CURRENT_TASK_DEF_ARN" ]; then
+            echo "::error::Rollback detected! Service reverted to previous task definition."
+            exit 1
+          else
+            echo "Deployment successful - no rollback occurred"
+          fi
