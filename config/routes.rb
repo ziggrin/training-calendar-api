@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get "health/check"
   namespace :api do
     namespace :v1 do
       resources :posts
@@ -6,7 +7,6 @@ Rails.application.routes.draw do
     end
   end
 
-  # Optional: a health check or a root path
-  get "up" => "rails/health#show", as: :rails_health_check
+  get '/healthcheck', to: 'health#check'
   root "api/v1/posts#index"
 end
