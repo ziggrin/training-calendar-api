@@ -95,16 +95,8 @@ jobs:
           service: ${{ env.SERVICE_NAME }}
           wait-for-service-stability: true
 
-      - name: DEBUG - Check ECS deployment status
-        run: |
-          aws ecs describe-services --services ${{ env.SERVICE_NAME }} --cluster ${{ env.CLUSTER_NAME }} --query "services[0].deployments" > deployments.json
-          cat deployments.json
-
       - name: Rollback detection
         id: rollback-detection
-        env:
-          CLUSTER_NAME: ${{ env.CLUSTER_NAME }}
-          SERVICE_NAME: ${{ env.SERVICE_NAME }}
         run: |
           # Get task definition ARN from previous deployment step
           NEW_TASK_DEF_ARN="${{ steps.deploy-task.outputs.task-definition-arn }}"
