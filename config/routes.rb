@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get "health/check"
   namespace :api do
     namespace :v1 do
       resources :posts
