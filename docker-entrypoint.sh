@@ -9,7 +9,7 @@ else
   if timeout 10 chamber exec "$CHAMBER_SERVICE" -- "$@"; then
     exec "$@"
   else
-    echo "Chamber failed or timed out. Running the command without secrets from AWS Parameter Store."
+    echo "Chamber failed or timed out. Running the command ($@) without secrets."
     exec "$@"
   fi
 fi
