@@ -47,3 +47,4 @@
 /*.Dockerfile
 # ROR VIEW - to be deleted later
 ./training-calendar-react
+*.md
