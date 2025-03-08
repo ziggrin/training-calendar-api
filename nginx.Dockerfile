@@ -7,6 +7,9 @@ RUN apt-get update && \
         nano && \
     rm -rf /var/lib/apt/lists/*
 
+# Remove default content
+RUN rm -rf /usr/share/nginx/html/*
+
 # Copy config
 COPY nginx/ /etc/nginx/
 
