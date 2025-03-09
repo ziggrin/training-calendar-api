@@ -21,7 +21,7 @@ docker compose up
 ```
 ## Frontend
 
-**Repository:** [https://github.com/ziggrin/training-calendar-frontend](https://github.com/ziggrin/training-calendar-frontend)
+**Repository:** [https://github.com/ziggrin/training-calendar-frontend](https://github.com/ziggrin/training-calendar-front)
 
 It might be easier (or preferred) to run the frontend on your local machine using your local Node.js installation. Simply navigate to the frontend directory and run:
 
